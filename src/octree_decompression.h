@@ -1,12 +1,12 @@
 /*
- * octree_compression.h
+ * octree_decompression.h
  *
  *  Created on: Jan 16, 2018
  *      Author: joacim
  */
 
-#ifndef OCTREE_COMPRESSION_H_
-#define OCTREE_COMPRESSION_H_
+#ifndef OCTREE_DECOMPRESSION_H_
+#define OCTREE_DECOMPRESSION_H_
 
 
 #include <pcl/common/common.h>
@@ -34,26 +34,28 @@ using namespace pcl::octree;
 
 namespace wp3 {
 
-typedef pcl::PointXYZ PointT_comp;
-typedef OctreePointCloudDensityContainer LeafT_comp;
-typedef OctreeContainerEmpty BranchT_comp;
-typedef Octree2BufBase<LeafT_comp, BranchT_comp> OctreeT_comp;
 
-class PointCloudCompression : public OctreePointCloud<PointT_comp, LeafT_comp, BranchT_comp, OctreeT_comp>
+typedef pcl::PointXYZI PointT_decomp;
+typedef OctreePointCloudDensityContainer LeafT_decomp;
+typedef OctreeContainerEmpty BranchT_decomp;
+typedef Octree2BufBase<LeafT_decomp, LeafT_decomp> OctreeT_decomp;
+
+
+class PointCloudDecompression : public OctreePointCloud<PointT_decomp, LeafT_decomp, BranchT_decomp, OctreeT_decomp>
 {
 public:
-	typedef PointT_comp PointT;
-	typedef LeafT_comp LeafT;
-	typedef BranchT_comp BranchT;
-	typedef OctreeT_comp OctreeT;
+	typedef PointT_decomp PointT;
+	typedef LeafT_decomp LeafT;
+	typedef BranchT_decomp BranchT;
+	typedef OctreeT_decomp OctreeT;
 
 	typedef typename OctreePointCloud<PointT, LeafT, BranchT, OctreeT>::PointCloud PointCloud;
 	typedef typename OctreePointCloud<PointT, LeafT, BranchT, OctreeT>::PointCloudPtr PointCloudPtr;
 	typedef typename OctreePointCloud<PointT, LeafT, BranchT, OctreeT>::PointCloudConstPtr PointCloudConstPtr;
 
 	// Boost shared pointers
-	typedef boost::shared_ptr<PointCloudCompression > Ptr;
-	typedef boost::shared_ptr<const PointCloudCompression > ConstPtr;
+	typedef boost::shared_ptr<PointCloudDecompression > Ptr;
+	typedef boost::shared_ptr<const PointCloudDecompression > ConstPtr;
 
 	typedef typename OctreeT::LeafNode LeafNode;
 	typedef typename OctreeT::BranchNode BranchNode;
@@ -62,7 +64,7 @@ public:
 	/** \brief Constructor
 	 *
 	 */
-	PointCloudCompression (
+	PointCloudDecompression (
 			bool showStatistics_arg = false,
 			const double pointResolution_arg = 0.001,
 			const double octreeResolution_arg = 0.01,
@@ -84,7 +86,7 @@ public:
 
 
 	/** \brief Empty deconstructor. */
-	virtual ~PointCloudCompression (){
+	virtual ~PointCloudDecompression (){
 
 	}
 
@@ -108,13 +110,6 @@ public:
         output_ = cloud_arg;
       }
     }
-
-
-	/** \brief Encode point cloud to output stream
-	 * \param cloud_arg:  point cloud to be compressed
-	 * \param compressed_tree_data_out_arg:  binary output stream containing compressed data
-	 */
-	void encodePointCloud (const PointCloudConstPtr &cloud_arg, std::ostream& compressed_tree_data_out_arg);
 
 
 	/** \brief Decode point cloud from input stream
@@ -142,34 +137,24 @@ public:
 
 private:
 
-
-	virtual void serializeTreeCallback (LeafT &leaf_arg, const OctreeKey& key_arg);
-
 	/** \brief Decode leaf nodes information during deserialization
 	 * \param key_arg octree key of new leaf node
 	 */
 	// param leaf_arg reference to new leaf node
-	virtual void deserializeTreeCallback (LeafT&, const OctreeKey& key_arg);
+	virtual void deserializeTreeCallback (LeafT &leaf_arg, const OctreeKey& key_arg);
 
-	/** \brief Write frame information to output stream
-	 * \param compressed_tree_data_out_arg: binary output stream
-	 */
-	void writeFrameHeader (std::ostream& compressed_tree_data_out_arg);
 
     /** \brief Read frame information to output stream
       * \param compressed_tree_data_in_arg: binary input stream
       */
     void readFrameHeader (std::istream& compressed_tree_data_in_arg);
 
+
     /** \brief Synchronize to frame header
       * \param compressed_tree_data_in_arg: binary input stream
       */
     void syncToHeader (std::istream& compressed_tree_data_in_arg);
 
-	/** \brief Apply entropy encoding to encoded information and output to binary stream
-	 * \param compressed_tree_data_out_arg: binary output stream
-	 */
-	void entropyEncoding(std::ostream& compressed_tree_data_out_arg);
 
     /** \brief Entropy decoding of input binary stream and output to information vectors
       * \param compressed_tree_data_in_arg: binary input stream
@@ -209,4 +194,4 @@ private:
 
 }
 
-#endif /* OCTREE_COMPRESSION_H_ */
+#endif /* OCTREE_DECOMPRESSION_H_ */
