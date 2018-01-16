@@ -20,21 +20,36 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/crop_box.h>
+#include <pcl/octree/octree.h>
+#include <pcl/octree/impl/octree2buf_base.hpp>
+#include <pcl/octree/octree2buf_base.h>
+#include <pcl/octree/octree_pointcloud.h>
+#include <pcl/octree/octree_pointcloud_density.h>
+
 #include <pcl/compression/octree_pointcloud_compression.h>
+#include <pcl/compression/impl/octree_pointcloud_compression.hpp>
 
-//include "custom_octree.h"
+#include "octree_compression.h"
 
-typedef pcl::octree::OctreeContainerPointIndex LeafType;
-typedef pcl::octree::OctreeContainerEmpty BranchType;
 
-typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
- typedef pcl::io::OctreePointCloudCompression<pcl::PointXYZ> Compressor;
+//typedef pcl::octree::OctreeContainerEmpty BranchType;
 
+typedef pcl::PointXYZ PointType;
+typedef pcl::PointCloud<PointType> PointCloud;
+
+
+typedef pcl::octree::OctreeContainerPointIndices LeafType;
+//typedef pcl::octree::OctreeContainerPointIndex LeafType;
 //typedef pcl::octree::OctreePointCloudDensityContainer LeafType;
+typedef pcl::octree::OctreeContainerEmpty BranchType;
+//typedef pcl::octree::OctreeBase<LeafType, BranchType> OctreeType;
+typedef pcl::octree::Octree2BufBase<LeafType, BranchType> OctreeType;
+typedef pcl::octree::OctreePointCloud<PointType, LeafType, BranchType, OctreeType> Octree;
 
-//typedef pcl::octree::Octree2BufBase<LeafType, BranchType> OctreeBaseType;
-//typedef pcl::octree::OctreePointCloud<PointCloud, LeafType, BranchType, OctreeBaseType> Octree;
+//typedef pcl::io::OctreePointCloudCompression<PointType, LeafType, BranchType> Compressor;
 
+typedef wp3::PointCloudCompression Compressor;
+Octree test(0.05);
 
 // ROS Subscriber
 ros::Subscriber subKinect;
@@ -83,7 +98,7 @@ private:
 	Compressor* pointCloudDecoder;
 
 	Eigen::Vector4f minPT, maxPT;
-	pcl::CropBox<pcl::PointXYZ> crop;
+	pcl::CropBox<PointType> crop;
 };
 
 
@@ -97,11 +112,11 @@ CloudHandler::CloudHandler(std::string sensorName) :
 	rosTransformGlobalFrame = "world";
 
 	// compress point cloud
-	pointCloudEncoder = new Compressor(compressionProfile, showStatistics,
-			pointResolution, octreeResolution, doVoxelGridDownDownSampling,
-			iFrameRate, doColorEncoding, colorBitResolution);
+	pointCloudEncoder = new Compressor(showStatistics,
+			pointResolution, octreeResolution,
+			iFrameRate);
 
-	pointCloudDecoder = new Compressor();
+	//pointCloudDecoder = new Compressor();
 
 	minPT << 0.2, 0.2, 0.2, 1;
 	maxPT << 10, 15, 5, 1;
@@ -133,7 +148,7 @@ void CloudHandler::callback(const PointCloud::ConstPtr &cloud){
 	crop.setInputCloud(transformedCloud);
 	crop.filter(*croppedCloud);
 
-//	CustomOctree<pcl::PointXYZ> octree(resolution);
+//	CustomOctree<PointType> octree(resolution);
 //	octree.defineBoundingBox(0.2, 0.2, 0.2, 10, 15, 5);
 //	octree.setInputCloud (croppedCloud);
 //	octree.addPointsFromInputCloud ();
@@ -141,20 +156,20 @@ void CloudHandler::callback(const PointCloud::ConstPtr &cloud){
 	// Stream for storing serialized compressed point cloud
 	std::stringstream compressedData;
 
-	pointCloudEncoder->deleteTree();
-	pointCloudEncoder->setResolution(0.05);
-	pointCloudEncoder->defineBoundingBox(0.2, 0.2, 0.2, 10, 15, 5);
+//	pointCloudEncoder->deleteTree();
+//	pointCloudEncoder->setResolution(0.05);
+//	pointCloudEncoder->defineBoundingBox(0.2, 0.2, 0.2, 10, 15, 5);
 	pointCloudEncoder->encodePointCloud (croppedCloud, compressedData);
 	std::cout << compressedData.tellp() << "\n" << endl;
-	pointCloudDecoder->decodePointCloud (compressedData, compressedCloud);
+//	pointCloudDecoder->decodePointCloud (compressedData, compressedCloud);
 
 //	std_msgs::String msg;
 //	msg.data = compressedData.str();
 //	pubSerialized.publish(msg);
 
 	// Publish the compressed cloud
-	compressedCloud->header.frame_id = rosTransformGlobalFrame;
-	pubCloud.publish(compressedCloud);
+//	compressedCloud->header.frame_id = rosTransformGlobalFrame;
+//	pubCloud.publish(compressedCloud);
 
 }
 
