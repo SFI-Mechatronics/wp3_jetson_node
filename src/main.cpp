@@ -22,16 +22,28 @@
 #include <pcl/filters/crop_box.h>
 #include <pcl/compression/octree_pointcloud_compression.h>
 
-typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-typedef pcl::io::OctreePointCloudCompression<pcl::PointXYZ> Compressor;
+//include "custom_octree.h"
 
-bool running = true;
+typedef pcl::octree::OctreeContainerPointIndex LeafType;
+typedef pcl::octree::OctreeContainerEmpty BranchType;
+
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+ typedef pcl::io::OctreePointCloudCompression<pcl::PointXYZ> Compressor;
+
+//typedef pcl::octree::OctreePointCloudDensityContainer LeafType;
+
+//typedef pcl::octree::Octree2BufBase<LeafType, BranchType> OctreeBaseType;
+//typedef pcl::octree::OctreePointCloud<PointCloud, LeafType, BranchType, OctreeBaseType> Octree;
+
 
 // ROS Subscriber
 ros::Subscriber subKinect;
 ros::Publisher pubCloud;
 //ros::Publisher pubSerialized;
 
+bool running = true;
+
+const double resolution = 0.05;
 
 class CloudHandler
 {
@@ -56,21 +68,19 @@ private:
 	PointCloud::Ptr croppedCloud;
 	PointCloud::Ptr compressedCloud;
 
+
 	// Compression setup
 	static const bool showStatistics = true;
 	static const double pointResolution = 0.01;
 	static const double octreeResolution = 0.05;
 	static const bool doVoxelGridDownDownSampling = true;
-	static const unsigned int iFrameRate = 0;
+	static const unsigned int iFrameRate = 10;
 	static const bool doColorEncoding = false;
 	static const unsigned char colorBitResolution = 8;
 	static const pcl::io::compression_Profiles_e compressionProfile = pcl::io::MANUAL_CONFIGURATION;
 
 	Compressor* pointCloudEncoder;
 	Compressor* pointCloudDecoder;
-
-	// Stream for storing serialized compressed point cloud
-	std::stringstream compressedData;
 
 	Eigen::Vector4f minPT, maxPT;
 	pcl::CropBox<pcl::PointXYZ> crop;
@@ -123,7 +133,19 @@ void CloudHandler::callback(const PointCloud::ConstPtr &cloud){
 	crop.setInputCloud(transformedCloud);
 	crop.filter(*croppedCloud);
 
+//	CustomOctree<pcl::PointXYZ> octree(resolution);
+//	octree.defineBoundingBox(0.2, 0.2, 0.2, 10, 15, 5);
+//	octree.setInputCloud (croppedCloud);
+//	octree.addPointsFromInputCloud ();
+//
+	// Stream for storing serialized compressed point cloud
+	std::stringstream compressedData;
+
+	pointCloudEncoder->deleteTree();
+	pointCloudEncoder->setResolution(0.05);
+	pointCloudEncoder->defineBoundingBox(0.2, 0.2, 0.2, 10, 15, 5);
 	pointCloudEncoder->encodePointCloud (croppedCloud, compressedData);
+	std::cout << compressedData.tellp() << "\n" << endl;
 	pointCloudDecoder->decodePointCloud (compressedData, compressedCloud);
 
 //	std_msgs::String msg;
@@ -131,8 +153,8 @@ void CloudHandler::callback(const PointCloud::ConstPtr &cloud){
 //	pubSerialized.publish(msg);
 
 	// Publish the compressed cloud
-	croppedCloud->header.frame_id = rosTransformGlobalFrame;
-	pubCloud.publish(croppedCloud);
+	compressedCloud->header.frame_id = rosTransformGlobalFrame;
+	pubCloud.publish(compressedCloud);
 
 }
 
@@ -140,7 +162,6 @@ void killHandler(int)
 {
 	ROS_INFO("%s","Shutdown request received. Terminating node.");
 	running = false;
-	nh.shutdown();
 }
 
 int main(int argc, char **argv)
@@ -150,6 +171,8 @@ int main(int argc, char **argv)
 
 	signal(SIGINT, killHandler);
 	signal(SIGTERM, killHandler);
+
+	ros::Rate loopRate(20);
 
 	if(!nh.hasParam("sensor_name")){
 		ROS_ERROR("%s","Missing sensor_name parameter!");
@@ -171,13 +194,15 @@ int main(int argc, char **argv)
 
 	while(running && ros::ok()){
 		ros::spinOnce();
+		loopRate.sleep();
 	}
 
 	if(ros::ok()){
+		nh.shutdown();
 		ros::shutdown();
 	}
 
-	delete(handler);
+	delete(&handler);
 
 	return 0;
 }

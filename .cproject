@@ -55,7 +55,7 @@
 									<listOptionValue builtIn="false" value="/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/opt/ros/kinetic/lib"/>
 									<listOptionValue builtIn="false" value="/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/usr/local/lib"/>
 								</option>
-								<option id="nvcc.linker.option.other.1038819346" superClass="nvcc.linker.option.other" valueType="stringList">
+								<option id="nvcc.linker.option.other.1038819346" name="Other options (-Xlinker [option])" superClass="nvcc.linker.option.other" valueType="stringList">
 									<listOptionValue builtIn="false" value="-rpath=&quot;/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/usr/lib&quot;"/>
 									<listOptionValue builtIn="false" value="-rpath=&quot;/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/usr/local/lib&quot;"/>
 									<listOptionValue builtIn="false" value="-rpath=&quot;/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/opt/ros/kinetic/lib&quot;"/>
