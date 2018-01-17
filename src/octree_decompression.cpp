@@ -26,7 +26,7 @@ void PointCloudDecompression::decodePointCloud (std::istream& compressed_tree_da
 	this->entropyDecoding (compressed_tree_data_in_arg);
 
 	// initialize point decoding
-	point_coder_.initializeDecoding ();
+	pointIntensityVectorIterator_ = pointIntensityVector_.begin ();
 
 	// initialize output cloud
 	output_->points.clear ();
@@ -89,12 +89,10 @@ void PointCloudDecompression::readFrameHeader ( std::istream& compressed_tree_da
 	{
 		double min_x, min_y, min_z, max_x, max_y, max_z;
 		double octree_resolution;
-		double point_resolution;
 
 		// read coder configuration
 		compressed_tree_data_in_arg.read (reinterpret_cast<char*> (&point_count_), sizeof (point_count_));
 		compressed_tree_data_in_arg.read (reinterpret_cast<char*> (&octree_resolution), sizeof (octree_resolution));
-		compressed_tree_data_in_arg.read (reinterpret_cast<char*> (&point_resolution), sizeof (point_resolution));
 
 		// read octree bounding box
 		compressed_tree_data_in_arg.read (reinterpret_cast<char*> (&min_x), sizeof (min_x));
@@ -109,8 +107,6 @@ void PointCloudDecompression::readFrameHeader ( std::istream& compressed_tree_da
 		this->setResolution (octree_resolution);
 		this->defineBoundingBox (min_x, min_y, min_z, max_x, max_y, max_z);
 
-		// configure color & point coding
-		point_coder_.setPrecision (static_cast<float> (point_resolution));
 	}
 } // End readFrameHeader
 
@@ -118,6 +114,7 @@ void PointCloudDecompression::readFrameHeader ( std::istream& compressed_tree_da
 void PointCloudDecompression::entropyDecoding (std::istream& compressed_tree_data_in_arg)
 {
 	uint64_t binary_tree_data_vector_size;
+	uint64_t point_intensity_data_vector_size;
 
 	compressed_point_data_len_ = 0;
 
@@ -125,6 +122,11 @@ void PointCloudDecompression::entropyDecoding (std::istream& compressed_tree_dat
 	compressed_tree_data_in_arg.read (reinterpret_cast<char*> (&binary_tree_data_vector_size), sizeof (binary_tree_data_vector_size));
 	binary_tree_data_vector_.resize (static_cast<std::size_t> (binary_tree_data_vector_size));
 	compressed_point_data_len_ += entropy_coder_.decodeStreamToCharVector (compressed_tree_data_in_arg, binary_tree_data_vector_);
+
+	// decode leaf voxel intensity
+	compressed_tree_data_in_arg.read (reinterpret_cast<char*> (&point_intensity_data_vector_size), sizeof (point_intensity_data_vector_size));
+	pointIntensityVector_.resize (static_cast<std::size_t> (point_intensity_data_vector_size));
+	compressed_point_data_len_ += entropy_coder_.decodeStreamToCharVector (compressed_tree_data_in_arg, pointIntensityVector_);
 
 } // End entropyDecoding()
 
@@ -137,13 +139,18 @@ void PointCloudDecompression::deserializeTreeCallback (LeafT &leaf_arg, const Oc
 	newPoint.x = static_cast<float> ((static_cast<double> (key_arg.x) + 0.5) * this->resolution_ + this->min_x_);
 	newPoint.y = static_cast<float> ((static_cast<double> (key_arg.y) + 0.5) * this->resolution_ + this->min_y_);
 	newPoint.z = static_cast<float> ((static_cast<double> (key_arg.z) + 0.5) * this->resolution_ + this->min_z_);
-	newPoint.intensity = (float)leaf_arg.getPointCounter();
 
+	// get point intensity
+	const unsigned char& intensity = static_cast<unsigned char> (*(pointIntensityVectorIterator_++));
+	newPoint.intensity = static_cast<float> (intensity);
 
-//	if(itest == 10){
-//		itest = 0;
-//		std::cout << newPoint.intensity;
-//	}
+	//newPoint.intensity = (float)leaf_arg.getPointCounter();
+
+//	itest++;
+//		if(itest == 100){
+//			itest = 0;
+//			std::cout << newPoint.intensity << " ";
+//		}
 	// add point to point cloud
 	output_->points.push_back (newPoint);
 

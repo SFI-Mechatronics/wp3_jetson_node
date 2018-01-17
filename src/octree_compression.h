@@ -20,7 +20,6 @@
 #include <pcl/octree/impl/octree_pointcloud.hpp>
 
 #include <pcl/compression/entropy_range_coder.h>
-#include "point_coding.h"
 
 #include <iterator>
 #include <iostream>
@@ -64,20 +63,19 @@ public:
 	 */
 	PointCloudCompression (
 			bool showStatistics_arg = false,
-			const double pointResolution_arg = 0.001,
 			const double octreeResolution_arg = 0.01,
 			const unsigned int iFrameRate_arg = 30 ):
 				OctreePointCloud<PointT, LeafT, BranchT, OctreeT> (octreeResolution_arg),
-				point_coder_ (),
+				//point_coder_ (),
 				entropy_coder_ (),
 				i_frame_rate_ (iFrameRate_arg),
 				i_frame_counter_ (0),
 				frame_ID_ (0),
 				point_count_ (0),
-				point_resolution_(pointResolution_arg),
 				octree_resolution_(octreeResolution_arg),
 				i_frame_ (true),
-				b_show_statistics_ (showStatistics_arg){
+				b_show_statistics_ (showStatistics_arg),
+				pointIntensityVector_ (){
 
 		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
 	} // End Constructor
@@ -93,7 +91,6 @@ public:
 	void initialize() {
 
 			this->setResolution (octree_resolution_);
-			point_coder_.setPrecision (static_cast<float> (point_resolution_));
 
 	} // End initialize()
 
@@ -117,13 +114,6 @@ public:
 	void encodePointCloud (const PointCloudConstPtr &cloud_arg, std::ostream& compressed_tree_data_out_arg);
 
 
-	/** \brief Decode point cloud from input stream
-	 * \param compressed_tree_data_in_arg: binary input stream containing compressed data
-	 * \param cloud_arg: reference to decoded point cloud
-	 */
-	void decodePointCloud (std::istream& compressed_tree_data_in_arg, PointCloudPtr &cloud_arg);
-
-
     /** \brief Get the amount of points within a leaf node voxel which is addressed by a point
       * \param[in] point_arg: a point addressing a voxel
       * \return amount of points that fall within leaf node voxel
@@ -145,36 +135,16 @@ private:
 
 	virtual void serializeTreeCallback (LeafT &leaf_arg, const OctreeKey& key_arg);
 
-	/** \brief Decode leaf nodes information during deserialization
-	 * \param key_arg octree key of new leaf node
-	 */
-	// param leaf_arg reference to new leaf node
-	virtual void deserializeTreeCallback (LeafT&, const OctreeKey& key_arg);
 
 	/** \brief Write frame information to output stream
 	 * \param compressed_tree_data_out_arg: binary output stream
 	 */
 	void writeFrameHeader (std::ostream& compressed_tree_data_out_arg);
 
-    /** \brief Read frame information to output stream
-      * \param compressed_tree_data_in_arg: binary input stream
-      */
-    void readFrameHeader (std::istream& compressed_tree_data_in_arg);
-
-    /** \brief Synchronize to frame header
-      * \param compressed_tree_data_in_arg: binary input stream
-      */
-    void syncToHeader (std::istream& compressed_tree_data_in_arg);
-
 	/** \brief Apply entropy encoding to encoded information and output to binary stream
 	 * \param compressed_tree_data_out_arg: binary output stream
 	 */
 	void entropyEncoding(std::ostream& compressed_tree_data_out_arg);
-
-    /** \brief Entropy decoding of input binary stream and output to information vectors
-      * \param compressed_tree_data_in_arg: binary input stream
-      */
-    void entropyDecoding (std::istream& compressed_tree_data_in_arg);
 
     /** \brief Pointer to output point cloud dataset. */
     PointCloudPtr output_;
@@ -182,8 +152,11 @@ private:
 	/** \brief Vector for storing binary tree structure */
 	std::vector<char> binary_tree_data_vector_;
 
-	/** \brief Point coding instance */
-	PointCoding<PointT> point_coder_;
+	/** \brief Vector for storing point intensity information  */
+    std::vector<char> pointIntensityVector_;
+
+//	/** \brief Point coding instance */
+//	PointCoding<PointT> point_coder_;
 
 	/** \brief Static range coder instance */
 	pcl::StaticRangeCoder entropy_coder_;
@@ -199,11 +172,11 @@ private:
 	bool b_show_statistics_;
 	uint64_t compressed_point_data_len_;
 
-	const double point_resolution_;
 	const double octree_resolution_;
 
 	//header
 	const char* frame_header_identifier_;
+
 
 };
 

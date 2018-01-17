@@ -20,6 +20,7 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/crop_box.h>
+#include <pcl/filters/passthrough.h>
 #include <pcl/octree/octree.h>
 #include <pcl/octree/impl/octree2buf_base.hpp>
 #include <pcl/octree/octree2buf_base.h>
@@ -87,7 +88,7 @@ private:
 	PointCloud::Ptr croppedCloud;
 
 	PointCloudXYZI::Ptr compressedCloud;
-
+	PointCloudXYZI::Ptr outputCloud;
 
 	// Compression setup
 	static const bool showStatistics = true;
@@ -101,13 +102,16 @@ private:
 
 	Eigen::Vector4f minPT, maxPT;
 	pcl::CropBox<PointType> crop;
+	pcl::PassThrough<PointType_out> ptfilter; // Initializing with true will allow us to extract the removed indices
 };
 
 
 CloudHandler::CloudHandler(std::string sensorName) :
  transformedCloud(new PointCloud()),
  croppedCloud(new PointCloud ()),
- compressedCloud(new PointCloudXYZI ())
+ compressedCloud(new PointCloudXYZI ()),
+ outputCloud(new PointCloudXYZI ()),
+ ptfilter(false)
 {
 	rosSensorName = sensorName;
 	rosTransformLocalFrame = rosSensorName + "_ir_optical_frame";
@@ -115,11 +119,11 @@ CloudHandler::CloudHandler(std::string sensorName) :
 
 	// compress point cloud
 	pointCloudEncoder = new Compressor(showStatistics,
-			pointResolution, octreeResolution,
+			octreeResolution,
 			iFrameRate);
 
 	pointCloudDecoder = new Decompressor(showStatistics,
-			pointResolution, octreeResolution,
+			octreeResolution,
 			iFrameRate);
 
 	minPT << 0.2, 0.2, 0.2, 1;
@@ -152,28 +156,26 @@ void CloudHandler::callback(const PointCloud::ConstPtr &cloud){
 	crop.setInputCloud(transformedCloud);
 	crop.filter(*croppedCloud);
 
-//	CustomOctree<PointType> octree(resolution);
-//	octree.defineBoundingBox(0.2, 0.2, 0.2, 10, 15, 5);
-//	octree.setInputCloud (croppedCloud);
-//	octree.addPointsFromInputCloud ();
-//
 	// Stream for storing serialized compressed point cloud
 	std::stringstream compressedData;
 
-//	pointCloudEncoder->deleteTree();
-//	pointCloudEncoder->setResolution(0.05);
-//	pointCloudEncoder->defineBoundingBox(0.2, 0.2, 0.2, 10, 15, 5);
 	pointCloudEncoder->encodePointCloud (croppedCloud, compressedData);
-	//std::cout << compressedData.tellp() << "\n" << endl;
+
 	pointCloudDecoder->decodePointCloud (compressedData, compressedCloud);
+
+	ptfilter.setInputCloud (compressedCloud);
+	ptfilter.setFilterFieldName ("intensity");
+	ptfilter.setFilterLimits (3.0, FLT_MAX);
+	ptfilter.filter (*outputCloud);
+
 
 //	std_msgs::String msg;
 //	msg.data = compressedData.str();
 //	pubSerialized.publish(msg);
 
 	// Publish the compressed cloud
-	compressedCloud->header.frame_id = rosTransformGlobalFrame;
-	pubCloud.publish(compressedCloud);
+	outputCloud->header.frame_id = rosTransformGlobalFrame;
+	pubCloud.publish(outputCloud);
 
 }
 
