@@ -114,12 +114,42 @@
 								<option id="nvcc.compiler.deviceDebug.122724995" name="Generate device debug information (-G)" superClass="nvcc.compiler.deviceDebug"/>
 								<option id="nvcc.compiler.option.level.1135034647" name="Generate host debug information (-g)" superClass="nvcc.compiler.option.level"/>
 								<option defaultValue="nvcc.compiler.optimization.level.most" id="nvcc.compiler.optimization.level.145934590" name="Optimization Level" superClass="nvcc.compiler.optimization.level" valueType="enumerated"/>
-								<option id="nvcc.compiler.pic.312165001" name="Position Independent Code (-fPIC)" superClass="nvcc.compiler.pic"/>
+								<option id="nvcc.compiler.pic.312165001" name="Position Independent Code (-fPIC)" superClass="nvcc.compiler.pic" value="true" valueType="boolean"/>
+								<option id="nvcc.compiler.include.paths.2111116282" superClass="nvcc.compiler.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/usr/include/eigen3"/>
+									<listOptionValue builtIn="false" value="/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/usr/local/include/pcl-1.8"/>
+									<listOptionValue builtIn="false" value="/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/opt/ros/kinetic/include"/>
+								</option>
 								<inputType id="nvcc.compiler.input.cu.1622595651" superClass="nvcc.compiler.input.cu"/>
 								<inputType id="nvcc.compiler.input.cpp.1195825588" superClass="nvcc.compiler.input.cpp"/>
 								<inputType id="nvcc.compiler.input.c.1827339268" superClass="nvcc.compiler.input.c"/>
 							</tool>
 							<tool id="nvcc.linker.base.1226374311" name="NVCC Linker" superClass="nvcc.linker.base">
+								<option id="nvcc.linker.option.libs.533924573" superClass="nvcc.linker.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="boost_system"/>
+									<listOptionValue builtIn="false" value="pcl_common"/>
+									<listOptionValue builtIn="false" value="pcl_filters"/>
+									<listOptionValue builtIn="false" value="pcl_octree"/>
+									<listOptionValue builtIn="false" value="pcl_io"/>
+									<listOptionValue builtIn="false" value="roscpp"/>
+									<listOptionValue builtIn="false" value="roscpp_serialization"/>
+									<listOptionValue builtIn="false" value="rosconsole"/>
+									<listOptionValue builtIn="false" value="rostime"/>
+									<listOptionValue builtIn="false" value="tf"/>
+									<listOptionValue builtIn="false" value="pcl_ros_tf"/>
+								</option>
+								<option id="nvcc.linker.option.paths.1635760739" superClass="nvcc.linker.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/opt/ros/kinetic/lib"/>
+									<listOptionValue builtIn="false" value="/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/usr/local/lib"/>
+								</option>
+								<option id="nvcc.linker.option.other.1988802704" superClass="nvcc.linker.option.other" valueType="stringList">
+									<listOptionValue builtIn="false" value="-rpath=&quot;/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/usr/lib&quot;"/>
+									<listOptionValue builtIn="false" value="-rpath=&quot;/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/usr/local/lib&quot;"/>
+									<listOptionValue builtIn="false" value="-rpath=&quot;/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/opt/ros/kinetic/lib&quot;"/>
+									<listOptionValue builtIn="false" value="-rpath=&quot;/home/joacim/64_TX2/Linux_for_Tegra_tx2/rootfs/home/nvidia/gpu-voxels/export/lib&quot;"/>
+									<listOptionValue builtIn="false" value="-rpath=&quot;/lib/aarch64-linux-gnu&quot;"/>
+									<listOptionValue builtIn="false" value="-rpath=&quot;/usr/lib/aarch64-linux-gnu&quot;"/>
+								</option>
 								<inputType id="nvcc.linker.input.53457679" superClass="nvcc.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -142,6 +172,7 @@
 					<sass major="6" minor="0"/>
 					<ptx major="6" minor="0"/>
 				</executable>
+				<editor-arch major="6" minor="0"/>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
