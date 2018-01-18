@@ -9,7 +9,6 @@
 
 namespace wp3 {
 
-
 void PointCloudDecompression::decodePointCloud (std::istream& compressed_tree_data_in_arg, PointCloudPtr &cloud_arg){
 
 	// synchronize to frame header
@@ -130,7 +129,7 @@ void PointCloudDecompression::entropyDecoding (std::istream& compressed_tree_dat
 
 } // End entropyDecoding()
 
-//int itest = 0;
+
 void PointCloudDecompression::deserializeTreeCallback (LeafT &leaf_arg, const OctreeKey& key_arg)
 {
 	PointT newPoint;
@@ -144,16 +143,8 @@ void PointCloudDecompression::deserializeTreeCallback (LeafT &leaf_arg, const Oc
 	const unsigned char& intensity = static_cast<unsigned char> (*(pointIntensityVectorIterator_++));
 	newPoint.intensity = static_cast<float> (intensity);
 
-	//newPoint.intensity = (float)leaf_arg.getPointCounter();
-
-//	itest++;
-//		if(itest == 100){
-//			itest = 0;
-//			std::cout << newPoint.intensity << " ";
-//		}
 	// add point to point cloud
 	output_->points.push_back (newPoint);
-
 
 } // End deserializeTreeCallback
 

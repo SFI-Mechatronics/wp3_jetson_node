@@ -63,15 +63,9 @@ public:
 	/** \brief Constructor
 	 *
 	 */
-	PointCloudDecompression (
-			bool showStatistics_arg = false,
-			const double octreeResolution_arg = 0.01,
-			const unsigned int iFrameRate_arg = 30 ):
+	PointCloudDecompression ( bool showStatistics_arg = false, const double octreeResolution_arg = 0.01 ) :
 				OctreePointCloud<PointT, LeafT, BranchT, OctreeT> (octreeResolution_arg),
-				//point_coder_ (),
 				entropy_coder_ (),
-				i_frame_rate_ (iFrameRate_arg),
-				i_frame_counter_ (0),
 				frame_ID_ (0),
 				point_count_ (0),
 				octree_resolution_(octreeResolution_arg),
@@ -80,7 +74,8 @@ public:
 				pointIntensityVector_ (),
 				pointIntensityVectorIterator_ (){
 
-		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
+		initialize();
+
 	} // End Constructor
 
 
@@ -93,6 +88,7 @@ public:
 	/** \brief Initialize globals */
 	void initialize() {
 
+		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
 		this->setResolution (octree_resolution_);
 
 	} // End initialize()
@@ -159,6 +155,7 @@ private:
 	 */
 	void entropyDecoding (std::istream& compressed_tree_data_in_arg);
 
+
 	/** \brief Pointer to output point cloud dataset. */
 	PointCloudPtr output_;
 
@@ -171,24 +168,18 @@ private:
 	/** \brief Iterator on differential point information vector */
 	std::vector<char>::const_iterator pointIntensityVectorIterator_;
 
-//	/** \brief Point coding instance */
-//	PointCoding<PointT> point_coder_;
-
 	/** \brief Static range coder instance */
 	pcl::StaticRangeCoder entropy_coder_;
 
 	// Settings
-	uint32_t i_frame_rate_;
-	uint32_t i_frame_counter_;
 	uint32_t frame_ID_;
 	uint64_t point_count_;
+	uint64_t compressed_point_data_len_;
 	bool i_frame_;
+	const double octree_resolution_;
 
 	//bool activating statistics
 	bool b_show_statistics_;
-	uint64_t compressed_point_data_len_;
-
-	const double octree_resolution_;
 
 	//header
 	const char* frame_header_identifier_;

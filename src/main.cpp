@@ -4,16 +4,12 @@
 #include <cstdlib>
 #include <signal.h>
 
-#include <stdio.h>
-#include <string.h>
-#include <sstream>
-#include <cstdlib>
-
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
 #include <std_msgs/String.h>
 #include <tf/transform_listener.h>
+
 #include <Eigen/Eigen>
 
 #include <pcl_ros/point_cloud.h>
@@ -21,37 +17,39 @@
 #include <pcl/point_types.h>
 #include <pcl/filters/crop_box.h>
 #include <pcl/filters/passthrough.h>
-#include <pcl/octree/octree.h>
-#include <pcl/octree/impl/octree2buf_base.hpp>
-#include <pcl/octree/octree2buf_base.h>
-#include <pcl/octree/octree_pointcloud.h>
-#include <pcl/octree/octree_pointcloud_density.h>
-
-#include <pcl/compression/octree_pointcloud_compression.h>
-#include <pcl/compression/impl/octree_pointcloud_compression.hpp>
 
 #include "octree_compression.h"
 #include "octree_decompression.h"
 
+// ROS defines
+#define _ROSRATE 60
+#define _DEFAULTNODENAME "compress_pc"
+#define _GLOBALFRAME "world"
+#define _KINECTFRAME "_ir_optical_frame"
+#define _KINECTPOINTS "/sd/points_nocolor"
+#define _TOPICOUT "/wp3/pc2_compressed"
 
-//typedef pcl::octree::OctreeContainerEmpty BranchType;
+// Compression defines
+#define _STATISTICS false
+#define _OCTREERESOLUTION 0.05
+#define _IFRAMERATE 10
 
+// Filter defines
+#define _MINX 0.2
+#define _MINY 0.2
+#define _MINZ 0.2
+#define _MAXX 10.0
+#define _MAXY 15.0
+#define _MAXZ 5.0
+
+#define _MINI 2.0
+
+// Typedefs
 typedef pcl::PointXYZ PointType;
 typedef pcl::PointCloud<PointType> PointCloud;
 
 typedef pcl::PointXYZI PointType_out;
 typedef pcl::PointCloud<PointType_out> PointCloudXYZI;
-
-//typedef pcl::octree::OctreeContainerPointIndices LeafType;
-////typedef pcl::octree::OctreeContainerPointIndex LeafType;
-////typedef pcl::octree::OctreePointCloudDensityContainer LeafType;
-//typedef pcl::octree::OctreeContainerEmpty BranchType;
-////typedef pcl::octree::OctreeBase<LeafType, BranchType> OctreeType;
-//typedef pcl::octree::Octree2BufBase<LeafType, BranchType> OctreeType;
-//typedef pcl::octree::OctreePointCloud<PointType, LeafType, BranchType, OctreeType> Octree;
-//
-////typedef pcl::io::OctreePointCloudCompression<PointType, LeafType, BranchType> Compressor;
-//Octree test(0.05);
 
 typedef wp3::PointCloudCompression Compressor;
 typedef wp3::PointCloudDecompression Decompressor;
@@ -63,14 +61,13 @@ ros::Publisher pubCloud;
 
 bool running = true;
 
-const double resolution = 0.05;
-
 class CloudHandler
 {
 public:
 	// Constructor
 	CloudHandler(std::string sensorName);
 	~CloudHandler();
+
 	// Callback for ROS subscriber
 	void callback(const PointCloud::ConstPtr &cloud);
 
@@ -91,15 +88,14 @@ private:
 	PointCloudXYZI::Ptr outputCloud;
 
 	// Compression setup
-	static const bool showStatistics = true;
-	static const double pointResolution = 0.01;
-	static const double octreeResolution = 0.05;
-	static const unsigned int iFrameRate = 10;
-
+	static const bool showStatistics = _STATISTICS;
+	static const double octreeResolution = _OCTREERESOLUTION;
+	static const unsigned int iFrameRate = _IFRAMERATE;
 
 	Compressor* pointCloudEncoder;
 	Decompressor* pointCloudDecoder;
 
+	// Filters
 	Eigen::Vector4f minPT, maxPT;
 	pcl::CropBox<PointType> crop;
 	pcl::PassThrough<PointType_out> ptfilter; // Initializing with true will allow us to extract the removed indices
@@ -114,21 +110,18 @@ CloudHandler::CloudHandler(std::string sensorName) :
  ptfilter(false)
 {
 	rosSensorName = sensorName;
-	rosTransformLocalFrame = rosSensorName + "_ir_optical_frame";
-	rosTransformGlobalFrame = "world";
+	rosTransformLocalFrame = rosSensorName + _KINECTFRAME;
+	rosTransformGlobalFrame = _GLOBALFRAME;
 
-	// compress point cloud
-	pointCloudEncoder = new Compressor(showStatistics,
-			octreeResolution,
-			iFrameRate);
+	// Compressor
+	pointCloudEncoder = new Compressor(showStatistics, octreeResolution, iFrameRate);
 
-	pointCloudDecoder = new Decompressor(showStatistics,
-			octreeResolution,
-			iFrameRate);
+	// Decompressor
+	pointCloudDecoder = new Decompressor(showStatistics, octreeResolution);
 
-	minPT << 0.2, 0.2, 0.2, 1;
-	maxPT << 10, 15, 5, 1;
-
+	// Box crop filter
+	minPT << _MINX, _MINY, _MINZ, 1;
+	maxPT << _MAXX, _MAXY, _MAXZ, 1;
 	crop.setMin(minPT);
 	crop.setMax(maxPT);
 }
@@ -165,9 +158,8 @@ void CloudHandler::callback(const PointCloud::ConstPtr &cloud){
 
 	ptfilter.setInputCloud (compressedCloud);
 	ptfilter.setFilterFieldName ("intensity");
-	ptfilter.setFilterLimits (3.0, FLT_MAX);
+	ptfilter.setFilterLimits (_MINI, FLT_MAX);
 	ptfilter.filter (*outputCloud);
-
 
 //	std_msgs::String msg;
 //	msg.data = compressedData.str();
@@ -187,13 +179,13 @@ void killHandler(int)
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "compress_pc", ros::init_options::NoSigintHandler);
+	ros::init(argc, argv, _DEFAULTNODENAME, ros::init_options::NoSigintHandler);
 	ros::NodeHandle nh("~");
 
 	signal(SIGINT, killHandler);
 	signal(SIGTERM, killHandler);
 
-	ros::Rate loopRate(20);
+	ros::Rate loopRate(_ROSRATE);
 
 	if(!nh.hasParam("sensor_name")){
 		ROS_ERROR("%s","Missing sensor_name parameter!");
@@ -209,8 +201,8 @@ int main(int argc, char **argv)
 
 	CloudHandler handler(sensorName);
 
-	subKinect = nh.subscribe<PointCloud>("/" + sensorName + "/sd/points_nocolor", 1, &CloudHandler::callback, &handler);
-	pubCloud = nh.advertise<PointCloudXYZI>("/" + sensorName + "/wp3/pc2_compressed", 1);
+	subKinect = nh.subscribe<PointCloud>("/" + sensorName + _KINECTPOINTS, 1, &CloudHandler::callback, &handler);
+	pubCloud = nh.advertise<PointCloudXYZI>("/" + sensorName + _TOPICOUT, 1);
 //	pubSerialized = nh.advertise<std_msgs::String>("/" + sensorName + "/wp3/pc2_coded", 1);
 
 	while(running && ros::ok()){

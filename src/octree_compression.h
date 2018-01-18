@@ -8,6 +8,11 @@
 #ifndef OCTREE_COMPRESSION_H_
 #define OCTREE_COMPRESSION_H_
 
+#include <iterator>
+#include <iostream>
+#include <vector>
+#include <string.h>
+#include <stdio.h>
 
 #include <pcl/common/common.h>
 #include <pcl/common/io.h>
@@ -20,14 +25,6 @@
 #include <pcl/octree/impl/octree_pointcloud.hpp>
 
 #include <pcl/compression/entropy_range_coder.h>
-
-#include <iterator>
-#include <iostream>
-#include <vector>
-#include <string.h>
-#include <iostream>
-#include <stdio.h>
-#include <string.h>
 
 using namespace pcl::octree;
 
@@ -57,7 +54,6 @@ public:
 	typedef typename OctreeT::LeafNode LeafNode;
 	typedef typename OctreeT::BranchNode BranchNode;
 
-
 	/** \brief Constructor
 	 *
 	 */
@@ -66,7 +62,6 @@ public:
 			const double octreeResolution_arg = 0.01,
 			const unsigned int iFrameRate_arg = 30 ):
 				OctreePointCloud<PointT, LeafT, BranchT, OctreeT> (octreeResolution_arg),
-				//point_coder_ (),
 				entropy_coder_ (),
 				i_frame_rate_ (iFrameRate_arg),
 				i_frame_counter_ (0),
@@ -77,7 +72,8 @@ public:
 				b_show_statistics_ (showStatistics_arg),
 				pointIntensityVector_ (){
 
-		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
+		initialize();
+
 	} // End Constructor
 
 
@@ -90,21 +86,22 @@ public:
 	/** \brief Initialize globals */
 	void initialize() {
 
-			this->setResolution (octree_resolution_);
+		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
+		this->setResolution (octree_resolution_);
 
 	} // End initialize()
 
 
-    /** \brief Provide a pointer to the output data set.
-      * \param cloud_arg: the boost shared pointer to a PointCloud message
-      */
-    inline void setOutputCloud (const PointCloudPtr &cloud_arg)
-    {
-      if (output_ != cloud_arg)
-      {
-        output_ = cloud_arg;
-      }
-    }
+	/** \brief Provide a pointer to the output data set.
+	 * \param cloud_arg: the boost shared pointer to a PointCloud message
+	 */
+	inline void setOutputCloud (const PointCloudPtr &cloud_arg)
+	{
+		if (output_ != cloud_arg)
+		{
+			output_ = cloud_arg;
+		}
+	}
 
 
 	/** \brief Encode point cloud to output stream
@@ -114,27 +111,26 @@ public:
 	void encodePointCloud (const PointCloudConstPtr &cloud_arg, std::ostream& compressed_tree_data_out_arg);
 
 
-    /** \brief Get the amount of points within a leaf node voxel which is addressed by a point
-      * \param[in] point_arg: a point addressing a voxel
-      * \return amount of points that fall within leaf node voxel
-      */
+	/** \brief Get the amount of points within a leaf node voxel which is addressed by a point
+	 * \param[in] point_arg: a point addressing a voxel
+	 * \return amount of points that fall within leaf node voxel
+	 */
 	unsigned int getVoxelDensityAtPoint (const PointT& point_arg) const
 	{
-	  unsigned int point_count = 0;
+		unsigned int point_count = 0;
 
-	  OctreePointCloudDensityContainer* leaf = this->findLeafAtPoint (point_arg);
+		OctreePointCloudDensityContainer* leaf = this->findLeafAtPoint (point_arg);
 
-	  if (leaf)
-	    point_count = leaf->getPointCounter ();
+		if (leaf)
+			point_count = leaf->getPointCounter ();
 
-	  return (point_count);
+		return (point_count);
 	}
 
 private:
 
 
 	virtual void serializeTreeCallback (LeafT &leaf_arg, const OctreeKey& key_arg);
-
 
 	/** \brief Write frame information to output stream
 	 * \param compressed_tree_data_out_arg: binary output stream
@@ -146,17 +142,14 @@ private:
 	 */
 	void entropyEncoding(std::ostream& compressed_tree_data_out_arg);
 
-    /** \brief Pointer to output point cloud dataset. */
-    PointCloudPtr output_;
+	/** \brief Pointer to output point cloud dataset. */
+	PointCloudPtr output_;
 
 	/** \brief Vector for storing binary tree structure */
 	std::vector<char> binary_tree_data_vector_;
 
 	/** \brief Vector for storing point intensity information  */
-    std::vector<char> pointIntensityVector_;
-
-//	/** \brief Point coding instance */
-//	PointCoding<PointT> point_coder_;
+	std::vector<char> pointIntensityVector_;
 
 	/** \brief Static range coder instance */
 	pcl::StaticRangeCoder entropy_coder_;
@@ -166,17 +159,15 @@ private:
 	uint32_t i_frame_counter_;
 	uint32_t frame_ID_;
 	uint64_t point_count_;
+	uint64_t compressed_point_data_len_;
 	bool i_frame_;
+	const double octree_resolution_;
 
 	//bool activating statistics
 	bool b_show_statistics_;
-	uint64_t compressed_point_data_len_;
-
-	const double octree_resolution_;
 
 	//header
 	const char* frame_header_identifier_;
-
 
 };
 

@@ -13,6 +13,9 @@ void PointCloudCompression::encodePointCloud (const PointCloudConstPtr &cloud_ar
 
 	unsigned char recent_tree_depth = static_cast<unsigned char> (this->getTreeDepth ());
 
+	// prepare for next frame
+	this->switchBuffers ();
+
 	// initialize octree
 	this->setInputCloud (cloud_arg);
 
@@ -40,9 +43,14 @@ void PointCloudCompression::encodePointCloud (const PointCloudConstPtr &cloud_ar
 		pointIntensityVector_.reserve (static_cast<unsigned int> (cloud_arg->points.size() ));
 
 		// serialize octree
-		if (i_frame_)
+		if (i_frame_){
+			// Build tree from scratch
+			this->deleteTree();
+			this->setResolution (octree_resolution_);
+			this->addPointsFromInputCloud ();
 			// i-frame encoding - encode tree structure without referencing previous buffer
 			this->serializeTree (binary_tree_data_vector_, false);
+		}
 		else
 			// p-frame encoding - XOR encoded tree structure
 			this->serializeTree (binary_tree_data_vector_, true);
@@ -52,9 +60,6 @@ void PointCloudCompression::encodePointCloud (const PointCloudConstPtr &cloud_ar
 
 		// apply entropy coding to the content of all data vectors and send data to output stream
 		this->entropyEncoding (compressed_tree_data_out_arg);
-
-		// prepare for next frame
-		this->switchBuffers ();
 
 		if (b_show_statistics_)
 		{
