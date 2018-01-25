@@ -10,18 +10,14 @@
 
 namespace wp3 {
 
-CloudDecompressor::CloudDecompressor(std::string sensorName) :
-				 compressedCloud(new PointCloudXYZI ()),
+CloudDecompressor::CloudDecompressor(std::string sensorName, std::string inputMsgTopic) :
+				 decompressedCloud(new PointCloudXYZI ()),
 				 outputCloud(new PointCloudXYZI ()),
 				 ptfilter(false),
-	//			 pointCloudEncoder(showStatistics, octreeResolution, _MINX, _MINY, _MINZ, _MAXX, _MAXY, _MAXZ, iFrameRate),
 				 pointCloudDecoder(showStatistics, octreeResolution)
 {
-	rosSensorName = sensorName;
-	rosTransformLocalFrame = rosSensorName + _KINECTFRAME;
-	rosTransformGlobalFrame = _GLOBALFRAME;
 
-	sub_ = nh_.subscribe<std_msgs::String>("/" + sensorName + _KINECTPOINTS, 1, &wp3::CloudDecompressor::roscallback, this);
+	sub_ = nh_.subscribe<std_msgs::String>("/" + sensorName + inputMsgTopic, 1, &wp3::CloudDecompressor::roscallback, this);
 //	pub_ = nh_.advertise<std_msgs::String>("/" + sensorName + _TOPICOUT, 1);
 }
 
@@ -34,11 +30,13 @@ void CloudDecompressor::roscallback(const std_msgs::String::ConstPtr& msg){
 
 	// Stream for storing serialized compressed point cloud
 	std::stringstream compressedData;
-	compressedData << msg->data.c_str();
 
-	pointCloudDecoder.decodePointCloud (compressedData, compressedCloud);
+	compressedData << msg->data;
 
-	ptfilter.setInputCloud (compressedCloud);
+//	std::cout << compressedData.str() << std::endl;
+	pointCloudDecoder.decodePointCloud (compressedData, decompressedCloud);
+
+	ptfilter.setInputCloud (decompressedCloud);
 	ptfilter.setFilterFieldName ("intensity");
 	ptfilter.setFilterLimits (_MINI, FLT_MAX);
 	ptfilter.filter (*outputCloud);

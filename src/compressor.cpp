@@ -9,7 +9,7 @@
 
 namespace wp3 {
 
-CloudCompressor::CloudCompressor(std::string sensorName) :
+CloudCompressor::CloudCompressor(std::string sensorName, std::string inputCloudTopic, std::string outputMsgTopic) :
 				 transformedCloud(new PointCloud()),
 				 croppedCloud(new PointCloud ()),
 				 pointCloudEncoder(showStatistics, octreeResolution, _MINX, _MINY, _MINZ, _MAXX, _MAXY, _MAXZ, iFrameRate)
@@ -24,8 +24,8 @@ CloudCompressor::CloudCompressor(std::string sensorName) :
 	crop.setMin(minPT);
 	crop.setMax(maxPT);
 
-	sub_ = nh_.subscribe<PointCloud>("/" + sensorName + _KINECTPOINTS, 1, &wp3::CloudCompressor::roscallback, this);
-	pub_ = nh_.advertise<std_msgs::String>("/" + sensorName + _TOPICOUT, 1);
+	sub_ = nh_.subscribe<PointCloud>("/" + sensorName + inputCloudTopic, 1, &wp3::CloudCompressor::roscallback, this);
+	pub_ = nh_.advertise<std_msgs::String>("/" + sensorName + outputMsgTopic, 1);
 }
 
 CloudCompressor::~CloudCompressor(){
@@ -58,6 +58,7 @@ void CloudCompressor::roscallback(const PointCloud::ConstPtr &cloud){
 
 		std_msgs::String msg;
 		msg.data = compressedData.str();
+
 		pub_.publish(msg);
 
 	// Publish the compressed cloud

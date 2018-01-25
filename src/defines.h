@@ -9,7 +9,7 @@
 #define DEFINES_H_
 
 // ROS defines
-#define _ROSRATE 60
+#define _ROSRATE 1
 #define _DEFAULTNODENAME "compress_pc"
 #define _GLOBALFRAME "world"
 #define _KINECTFRAME "_ir_optical_frame"

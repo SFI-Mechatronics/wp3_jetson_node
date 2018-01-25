@@ -29,10 +29,6 @@
 #include <pcl/filters/passthrough.h>
 
 #include "octree_compression.h"
-#include "octree_decompression.h"
-
-#include "octree_compression.h"
-
 
 #include "defines.h"
 
@@ -44,7 +40,7 @@ typedef pcl::PointXYZI PointType_out;
 typedef pcl::PointCloud<PointType_out> PointCloudXYZI;
 
 typedef wp3::PointCloudCompression Compressor;
-typedef wp3::PointCloudDecompression Decompressor;
+
 
 namespace wp3 {
 
@@ -52,7 +48,7 @@ class CloudCompressor
 {
 public:
 	// Constructor
-	CloudCompressor(std::string sensorName);
+	CloudCompressor(std::string sensorName, std::string inputCloudTopic, std::string outputMsgTopic);
 	~CloudCompressor();
 
 	// Callback for PointCloudXYZ subscriber
@@ -82,12 +78,10 @@ private:
 	static const unsigned int iFrameRate = _IFRAMERATE;
 
 	Compressor pointCloudEncoder;
-//	Decompressor pointCloudDecoder;
 
 	// Filters
 	Eigen::Vector4f minPT, maxPT;
 	pcl::CropBox<PointType> crop;
-//	pcl::PassThrough<PointType_out> ptfilter; // Initializing with true will allow us to extract the removed indices
 };
 
 }

@@ -20,6 +20,7 @@
 
 #include "defines.h"
 #include "compressor.h"
+#include "decompressor.h"
 
 // Typedefs
 typedef pcl::PointXYZ PointType;
@@ -65,8 +66,9 @@ int main(int argc, char **argv)
 
 		ros::Duration(1.0).sleep();
 
-		wp3::CloudCompressor compressor(sensorName);
+		wp3::CloudCompressor compressor(sensorName, _KINECTPOINTS, _TOPICOUT);
 
+		wp3::CloudDecompressor decompressor(sensorName, _TOPICOUT);
 		//subKinect = nh.subscribe<PointCloud>("/" + sensorName + _KINECTPOINTS, 1, &CloudHandler::cloudCallback, &handler);
 		//subVelodyne = nh.subscribe<PointCloud>(_VELODYNEPOINTS, 1, &CloudHandler::velodyneCallback, &handler);
 		//pubCloud = nh.advertise<PointCloudXYZI>("/" + sensorName + _TOPICOUT, 1);
