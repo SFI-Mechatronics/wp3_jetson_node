@@ -5,16 +5,15 @@
  *      Author: joacim
  */
 
-
 #include "decompressor.h"
 
 namespace wp3 {
 
-CloudDecompressor::CloudDecompressor(std::string sensorName, std::string inputMsgTopic) :
+CloudDecompressor::CloudDecompressor(const PointCloudXYZI::Ptr output, std::string sensorName, std::string inputMsgTopic, const bool showStatistics) :
 				 decompressedCloud(new PointCloudXYZI ()),
-				 outputCloud(new PointCloudXYZI ()),
+				 outputCloud(output),
 				 ptfilter(false),
-				 pointCloudDecoder(showStatistics, octreeResolution)
+				 pointCloudDecoder(showStatistics)
 {
 
 	sub_ = nh_.subscribe<std_msgs::String>("/" + sensorName + inputMsgTopic, 1, &wp3::CloudDecompressor::roscallback, this);

@@ -45,7 +45,7 @@ class CloudDecompressor
 {
 public:
 	// Constructor
-	CloudDecompressor(std::string sensorName, std::string inputMsgTopic);
+	CloudDecompressor(const PointCloudXYZI::Ptr output, std::string sensorName, std::string inputMsgTopic, const bool showStatistics);
 	~CloudDecompressor();
 
 	// Callback for PointCloudXYZ subscriber
@@ -62,10 +62,6 @@ private:
 	// Pointers to temporary point clouds
 	PointCloudXYZI::Ptr decompressedCloud;
 	PointCloudXYZI::Ptr outputCloud;
-
-	// Compression setup
-	static const bool showStatistics = _STATISTICS;
-	static const double octreeResolution = _OCTREERESOLUTION;
 
 	Decompressor pointCloudDecoder;
 

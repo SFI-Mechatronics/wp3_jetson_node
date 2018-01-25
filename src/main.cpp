@@ -56,6 +56,7 @@ int main(int argc, char **argv)
 
 	ros::Rate loopRate(_ROSRATE);
 
+	PointCloudXYZI::Ptr output_clout(new PointCloudXYZI);
 
 	if(!nh.hasParam("sensor_name"))
 		ROS_ERROR("%s","Missing _sensor_name:=<name> parameter! Shutting down...");
@@ -68,11 +69,8 @@ int main(int argc, char **argv)
 
 		wp3::CloudCompressor compressor(sensorName, _KINECTPOINTS, _TOPICOUT);
 
-		wp3::CloudDecompressor decompressor(sensorName, _TOPICOUT);
-		//subKinect = nh.subscribe<PointCloud>("/" + sensorName + _KINECTPOINTS, 1, &CloudHandler::cloudCallback, &handler);
-		//subVelodyne = nh.subscribe<PointCloud>(_VELODYNEPOINTS, 1, &CloudHandler::velodyneCallback, &handler);
-		//pubCloud = nh.advertise<PointCloudXYZI>("/" + sensorName + _TOPICOUT, 1);
-		//	pubSerialized = nh.advertise<std_msgs::String>("/" + sensorName + "/wp3/pc2_coded", 1);
+		wp3::CloudDecompressor decompressor(output_clout, sensorName, _TOPICOUT, false);
+
 
 		while(running && ros::ok()){
 			ros::spinOnce();

@@ -58,19 +58,18 @@ public:
 	/** \brief Constructor
 	 *
 	 */
-	PointCloudDecompression ( bool showStatistics_arg = false, const double octreeResolution_arg = 0.01 ) :
-				OctreePointCloud<PointT, LeafT, BranchT, OctreeT> (octreeResolution_arg),
+	PointCloudDecompression ( bool showStatistics_arg = false) :
+				OctreePointCloud<PointT, LeafT, BranchT, OctreeT> (0.05),
 				entropy_coder_ (),
 				frame_ID_ (0),
 				point_count_ (0),
-				octree_resolution_(octreeResolution_arg),
 				i_frame_ (true),
 				b_show_statistics_ (showStatistics_arg),
 				pointIntensityVector_ (),
 				pointIntensityVectorIterator_ (){
 
 		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
-		this->setResolution (octree_resolution_);
+		//this->setResolution (octree_resolution_);
 
 	} // End Constructor
 
@@ -164,7 +163,6 @@ private:
 	uint64_t point_count_;
 	uint64_t compressed_point_data_len_;
 	bool i_frame_;
-	const double octree_resolution_;
 
 	//bool activating statistics
 	bool b_show_statistics_;
