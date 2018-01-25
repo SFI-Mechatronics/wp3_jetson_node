@@ -48,7 +48,7 @@ class CloudCompressor
 {
 public:
 	// Constructor
-	CloudCompressor(std::string sensorName, std::string inputCloudTopic, std::string outputMsgTopic);
+	CloudCompressor(std::string sensorName, std::string inputCloudTopic, std::string outputMsgTopic, double resolution);
 	~CloudCompressor();
 
 	// Callback for PointCloudXYZ subscriber
@@ -74,7 +74,7 @@ private:
 
 	// Compression setup
 	static const bool showStatistics = _STATISTICS;
-	static const double octreeResolution = _OCTREERESOLUTION;
+	double octreeResolution;
 	static const unsigned int iFrameRate = _IFRAMERATE;
 
 	Compressor pointCloudEncoder;

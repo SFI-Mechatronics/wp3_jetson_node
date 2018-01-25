@@ -39,11 +39,11 @@ void PointCloudCompression::encodePointCloud (const PointCloudConstPtr &cloud_ar
 
 		// serialize octree
 		if (i_frame_){
-			// Build tree from scratch
-			this->deleteTree();
-			this->setResolution (octree_resolution_);
-			this->defineBoundingBox(minX_, minY_, minZ_, maxX_, maxY_, maxZ_);
-			this->addPointsFromInputCloud ();
+//		//  Build tree from scratch
+//			this->deleteTree();
+//			this->setResolution (octree_resolution_);
+//			this->defineBoundingBox(minX_, minY_, minZ_, maxX_, maxY_, maxZ_);
+//			this->addPointsFromInputCloud ();
 			// i-frame encoding - encode tree structure without referencing previous buffer
 			this->serializeTree (binary_tree_data_vector_, false);
 		}

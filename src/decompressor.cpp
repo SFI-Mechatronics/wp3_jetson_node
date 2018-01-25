@@ -9,15 +9,15 @@
 
 namespace wp3 {
 
-CloudDecompressor::CloudDecompressor(const PointCloudXYZI::Ptr output, std::string sensorName, std::string inputMsgTopic, const bool showStatistics) :
+CloudDecompressor::CloudDecompressor(std::string sensorName, std::string inputMsgTopic, const bool showStatistics) :
 				 decompressedCloud(new PointCloudXYZI ()),
-				 outputCloud(output),
+				 outputCloud(new PointCloudXYZI ()),
 				 ptfilter(false),
 				 pointCloudDecoder(showStatistics)
 {
 
 	sub_ = nh_.subscribe<std_msgs::String>("/" + sensorName + inputMsgTopic, 1, &wp3::CloudDecompressor::roscallback, this);
-//	pub_ = nh_.advertise<std_msgs::String>("/" + sensorName + _TOPICOUT, 1);
+	pub_ = nh_.advertise<PointCloudXYZI>("/" + sensorName + _TOPICOUT, 1);
 }
 
 CloudDecompressor::~CloudDecompressor(){
@@ -42,7 +42,7 @@ void CloudDecompressor::roscallback(const std_msgs::String::ConstPtr& msg){
 
 	// Publish the compressed cloud
 //	outputCloud->header.frame_id = rosTransformGlobalFrame;
-//	pub_.publish(outputCloud);
+	pub_.publish(outputCloud);
 
 }
 

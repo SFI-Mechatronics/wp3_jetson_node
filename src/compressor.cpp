@@ -9,10 +9,11 @@
 
 namespace wp3 {
 
-CloudCompressor::CloudCompressor(std::string sensorName, std::string inputCloudTopic, std::string outputMsgTopic) :
+CloudCompressor::CloudCompressor(std::string sensorName, std::string inputCloudTopic, std::string outputMsgTopic, double resolution) :
 				 transformedCloud(new PointCloud()),
 				 croppedCloud(new PointCloud ()),
-				 pointCloudEncoder(showStatistics, octreeResolution, _MINX, _MINY, _MINZ, _MAXX, _MAXY, _MAXZ, iFrameRate)
+				 octreeResolution(resolution),
+				 pointCloudEncoder(showStatistics, resolution, _MINX, _MINY, _MINZ, _MAXX, _MAXY, _MAXZ, iFrameRate)
 {
 	rosSensorName = sensorName;
 	rosTransformLocalFrame = rosSensorName + _KINECTFRAME;

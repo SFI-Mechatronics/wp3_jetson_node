@@ -45,7 +45,7 @@ class CloudDecompressor
 {
 public:
 	// Constructor
-	CloudDecompressor(const PointCloudXYZI::Ptr output, std::string sensorName, std::string inputMsgTopic, const bool showStatistics);
+	CloudDecompressor(std::string sensorName, std::string inputMsgTopic, const bool showStatistics);
 	~CloudDecompressor();
 
 	// Callback for PointCloudXYZ subscriber

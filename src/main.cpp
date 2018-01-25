@@ -20,7 +20,6 @@
 
 #include "defines.h"
 #include "compressor.h"
-#include "decompressor.h"
 
 // Typedefs
 typedef pcl::PointXYZ PointType;
@@ -30,20 +29,22 @@ typedef pcl::PointXYZI PointType_out;
 typedef pcl::PointCloud<PointType_out> PointCloudXYZI;
 
 typedef wp3::PointCloudCompression Compressor;
-typedef wp3::PointCloudDecompression Decompressor;
+//typedef wp3::PointCloudDecompression Decompressor;
 
 // ROS Subscriber
 
 //ros::Publisher pubSerialized;
 
-bool running = true;
-
-
 
 void killHandler(int)
 {
-	ROS_INFO("%s","Shutdown request received. Terminating node.");
-	running = false;
+	ROS_INFO("%s","Shutdown request received.");
+	ros::NodeHandle nh;
+	ROS_INFO("%s","Terminating nodehandle.");
+	nh.shutdown();
+	ROS_INFO("%s","Terminating rosnode.");
+	ros::shutdown();
+
 }
 
 int main(int argc, char **argv)
@@ -58,29 +59,35 @@ int main(int argc, char **argv)
 
 	PointCloudXYZI::Ptr output_clout(new PointCloudXYZI);
 
+
+
 	if(!nh.hasParam("sensor_name"))
 		ROS_ERROR("%s","Missing _sensor_name:=<name> parameter! Shutting down...");
+	else if(!nh.hasParam("resolution"))
+		ROS_ERROR("%s","Missing _resolution:=<resolution> parameter! Shutting down...");
 	else {
 
 		std::string sensorName;
 		nh.getParam("sensor_name", sensorName);
 
+		double resolution;
+		nh.getParam("resolution", resolution);
+
 		ros::Duration(1.0).sleep();
 
-		wp3::CloudCompressor compressor(sensorName, _KINECTPOINTS, _TOPICOUT);
+		wp3::CloudCompressor compressor(sensorName, _KINECTPOINTS, _TOPICOUT, resolution);
 
-		wp3::CloudDecompressor decompressor(output_clout, sensorName, _TOPICOUT, false);
+//		wp3::CloudDecompressor decompressor(sensorName, _TOPICOUT, false);
 
 
-		while(running && ros::ok()){
+		while(ros::ok()){
 			ros::spinOnce();
 			loopRate.sleep();
 		}
 
 	} // end else if has sensorname
 
-	nh.shutdown();
-	ros::shutdown();
 
+	ROS_INFO("%s","Shutdown complete.");
 	return 0;
 }

@@ -21,16 +21,16 @@
 
 // Compression defines
 #define _STATISTICS false
-#define _OCTREERESOLUTION 0.025
-#define _IFRAMERATE 10
+#define _OCTREERESOLUTION 0.03
+#define _IFRAMERATE 20
 
 // Filter defines
 #define _MINX 0.1
 #define _MINY 0.1
 #define _MINZ 0.1
 #define _MAXX 10.0
-#define _MAXY 15.0
-#define _MAXZ 5.0
+#define _MAXY 14.4
+#define _MAXZ 4.8
 
 #define _MINI 2.0
 
