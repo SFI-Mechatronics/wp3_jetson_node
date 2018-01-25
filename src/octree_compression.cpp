@@ -11,11 +11,6 @@ namespace wp3 {
 
 void PointCloudCompression::encodePointCloud (const PointCloudConstPtr &cloud_arg, std::ostream& compressed_tree_data_out_arg){
 
-	unsigned char recent_tree_depth = static_cast<unsigned char> (this->getTreeDepth ());
-
-	// prepare for next frame
-	this->switchBuffers ();
-
 	// initialize octree
 	this->setInputCloud (cloud_arg);
 
@@ -26,7 +21,7 @@ void PointCloudCompression::encodePointCloud (const PointCloudConstPtr &cloud_ar
 	if (this->leaf_count_>0) {
 
 		// if octree depth changed, we enforce I-frame encoding
-		i_frame_ |= (recent_tree_depth != this->getTreeDepth ());// | !(iFrameCounter%10);
+		i_frame_ |= (recent_tree_depth_ != this->getTreeDepth ());// | !(iFrameCounter%10);
 
 		// enable I-frame rate
 		if (i_frame_counter_++==i_frame_rate_)
@@ -47,6 +42,7 @@ void PointCloudCompression::encodePointCloud (const PointCloudConstPtr &cloud_ar
 			// Build tree from scratch
 			this->deleteTree();
 			this->setResolution (octree_resolution_);
+			this->defineBoundingBox(minX_, minY_, minZ_, maxX_, maxY_, maxZ_);
 			this->addPointsFromInputCloud ();
 			// i-frame encoding - encode tree structure without referencing previous buffer
 			this->serializeTree (binary_tree_data_vector_, false);
@@ -60,6 +56,11 @@ void PointCloudCompression::encodePointCloud (const PointCloudConstPtr &cloud_ar
 
 		// apply entropy coding to the content of all data vectors and send data to output stream
 		this->entropyEncoding (compressed_tree_data_out_arg);
+
+		// prepare for next frame
+		recent_tree_depth_ = this->getTreeDepth ();
+		this->switchBuffers ();
+
 
 		if (b_show_statistics_)
 		{
@@ -87,6 +88,8 @@ void PointCloudCompression::encodePointCloud (const PointCloudConstPtr &cloud_ar
 		if (b_show_statistics_)
 			PCL_INFO ("Info: Dropping empty point cloud\n");
 		this->deleteTree();
+		this->setResolution (octree_resolution_);
+		this->defineBoundingBox(minX_, minY_, minZ_, maxX_, maxY_, maxZ_);
 		i_frame_counter_ = 0;
 		i_frame_ = true;
 	} // End if leaf_count > 0
@@ -150,7 +153,7 @@ void PointCloudCompression::entropyEncoding(std::ostream& compressed_tree_data_o
 
 } // End entropyEncoding()
 
-//int itest2 = 0;
+
 void PointCloudCompression::serializeTreeCallback (LeafT &leaf_arg, const OctreeKey & key_arg)
 {
 	// reference to point indices vector stored within octree leaf
@@ -161,13 +164,6 @@ void PointCloudCompression::serializeTreeCallback (LeafT &leaf_arg, const Octree
 	// get intensity
 	intensity = static_cast<unsigned char> (std::max (0, std::min<int>(255, density )));
 	pointIntensityVector_.push_back (intensity);
-
-//	itest2++;
-//	if(itest2 == 100){
-//		itest2 = 0;
-//		//std::cout << static_cast<unsigned int>(intensity) << " ";
-//		std::cout << density << " ";
-//	}
 
 } // End serializeTreeCallback
 

@@ -11,8 +11,8 @@
 #include <iterator>
 #include <iostream>
 #include <vector>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <pcl/common/common.h>
 #include <pcl/common/io.h>
@@ -25,6 +25,7 @@
 #include <pcl/octree/impl/octree_pointcloud.hpp>
 
 #include <pcl/compression/entropy_range_coder.h>
+
 
 using namespace pcl::octree;
 
@@ -60,6 +61,8 @@ public:
 	PointCloudCompression (
 			bool showStatistics_arg = false,
 			const double octreeResolution_arg = 0.01,
+			const double minX_arg = 0, const double minY_arg = 0, const double minZ_arg = 0,
+			const double maxX_arg = 10, const double maxY_arg = 10, const double maxZ_arg = 10,
 			const unsigned int iFrameRate_arg = 30 ):
 				OctreePointCloud<PointT, LeafT, BranchT, OctreeT> (octreeResolution_arg),
 				entropy_coder_ (),
@@ -70,9 +73,16 @@ public:
 				octree_resolution_(octreeResolution_arg),
 				i_frame_ (true),
 				b_show_statistics_ (showStatistics_arg),
-				pointIntensityVector_ (){
+				pointIntensityVector_ (),
+				recent_tree_depth_(0),
+				minX_(minX_arg), minY_(minY_arg), minZ_(minZ_arg),
+				maxX_(maxX_arg), maxY_(maxY_arg), maxZ_(maxZ_arg){
 
-		initialize();
+
+		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
+
+		this->setResolution (octree_resolution_);
+		this->defineBoundingBox(minX_, minY_, minZ_, maxX_, maxY_, maxZ_);
 
 	} // End Constructor
 
@@ -81,15 +91,6 @@ public:
 	virtual ~PointCloudCompression (){
 
 	}
-
-
-	/** \brief Initialize globals */
-	void initialize() {
-
-		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
-		this->setResolution (octree_resolution_);
-
-	} // End initialize()
 
 
 	/** \brief Provide a pointer to the output data set.
@@ -162,6 +163,15 @@ private:
 	uint64_t compressed_point_data_len_;
 	bool i_frame_;
 	const double octree_resolution_;
+
+	unsigned int recent_tree_depth_;
+
+	const double minX_;
+	const double minY_;
+	const double minZ_;
+	const double maxX_;
+	const double maxY_;
+	const double maxZ_;
 
 	//bool activating statistics
 	bool b_show_statistics_;

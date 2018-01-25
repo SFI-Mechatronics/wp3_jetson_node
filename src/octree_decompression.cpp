@@ -9,6 +9,7 @@
 
 namespace wp3 {
 
+
 void PointCloudDecompression::decodePointCloud (std::istream& compressed_tree_data_in_arg, PointCloudPtr &cloud_arg){
 
 	// synchronize to frame header

@@ -8,6 +8,11 @@
 #ifndef OCTREE_DECOMPRESSION_H_
 #define OCTREE_DECOMPRESSION_H_
 
+#include <iterator>
+#include <iostream>
+#include <vector>
+#include <stdio.h>
+#include <string.h>
 
 #include <pcl/common/common.h>
 #include <pcl/common/io.h>
@@ -21,24 +26,14 @@
 
 #include <pcl/compression/entropy_range_coder.h>
 
-#include <iterator>
-#include <iostream>
-#include <vector>
-#include <string.h>
-#include <iostream>
-#include <stdio.h>
-#include <string.h>
-
 using namespace pcl::octree;
 
 namespace wp3 {
-
 
 typedef pcl::PointXYZI PointT_decomp;
 typedef OctreePointCloudDensityContainer LeafT_decomp;
 typedef OctreeContainerEmpty BranchT_decomp;
 typedef Octree2BufBase<LeafT_decomp, LeafT_decomp> OctreeT_decomp;
-
 
 class PointCloudDecompression : public OctreePointCloud<PointT_decomp, LeafT_decomp, BranchT_decomp, OctreeT_decomp>
 {
@@ -74,7 +69,8 @@ public:
 				pointIntensityVector_ (),
 				pointIntensityVectorIterator_ (){
 
-		initialize();
+		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
+		this->setResolution (octree_resolution_);
 
 	} // End Constructor
 
@@ -84,14 +80,6 @@ public:
 
 	}
 
-
-	/** \brief Initialize globals */
-	void initialize() {
-
-		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
-		this->setResolution (octree_resolution_);
-
-	} // End initialize()
 
 
 	/** \brief Provide a pointer to the output data set.
