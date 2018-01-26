@@ -53,10 +53,6 @@ int main(int argc, char **argv)
 
 	ros::Rate loopRate(_ROSRATE);
 
-	PointCloudXYZI::Ptr output_clout(new PointCloudXYZI);
-
-
-
 	if(!nh.hasParam("sensor_name"))
 		ROS_ERROR("%s","Missing _sensor_name:=<name> parameter! Shutting down...");
 	else if(!nh.hasParam("resolution"))
@@ -74,7 +70,6 @@ int main(int argc, char **argv)
 		wp3::CloudCompressor compressor(_TOPICOUT, _KINECTPOINTS, sensorName, resolution, _STATISTICS);
 
 //		wp3::CloudDecompressor decompressor(sensorName, _TOPICOUT, false);
-
 
 		while(ros::ok()){
 			ros::spinOnce();

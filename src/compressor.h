@@ -49,34 +49,35 @@ class CloudCompressor
 public:
 	// Constructor
 	CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string sensorName, double resolution, bool showStatistics);
-	~CloudCompressor();
+
+	// Empty deconstrucor
+	~CloudCompressor(){}
 
 	// Callback for PointCloudXYZ subscriber
 	void roscallback(const PointCloud::ConstPtr &cloud);
 
 private:
+
+	// ROS variables
 	std::string rosTFGlobalFrame_;
 	std::string rosTFLocalFrame_;
 
-	// ROS handles
 	ros::NodeHandle nh_;
-
-	tf::TransformListener tfListener_;
-
 	ros::Subscriber sub_;
 	ros::Publisher pub_;
+
+	tf::TransformListener tfListener_;
 
 	// Pointers to temporary point clouds
 	PointCloud::Ptr transformedCloud_;
 	PointCloud::Ptr croppedCloud_;
-
 
 	// Compression setup
 	double octreeResolution_;
 
 	Compressor pointCloudEncoder_;
 
-	// Filters
+	// Box crop filter
 	Eigen::Vector4f minPT_, maxPT_;
 	pcl::CropBox<PointType> crop_;
 };

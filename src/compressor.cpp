@@ -9,6 +9,7 @@
 
 namespace wp3 {
 
+// Constructor
 CloudCompressor::CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string sensorName, double resolution, bool showStatistics) :
 						 transformedCloud_(new PointCloud()),
 						 croppedCloud_(new PointCloud ()),
@@ -18,7 +19,7 @@ CloudCompressor::CloudCompressor(std::string outputMsgTopic, std::string inputCl
 	rosTFLocalFrame_ = sensorName + _KINECTFRAME;
 	rosTFGlobalFrame_ = _GLOBALFRAME;
 
-	// Box crop filter
+	// Setup box crop filter
 	minPT_ << _MINX, _MINY, _MINZ, 1;
 	maxPT_ << _MAXX, _MAXY, _MAXZ, 1;
 	crop_.setMin(minPT_);
@@ -26,10 +27,6 @@ CloudCompressor::CloudCompressor(std::string outputMsgTopic, std::string inputCl
 
 	sub_ = nh_.subscribe<PointCloud>("/" + sensorName + inputCloudTopic, 1, &wp3::CloudCompressor::roscallback, this);
 	pub_ = nh_.advertise<std_msgs::String>("/" + sensorName + outputMsgTopic, 1);
-}
-
-CloudCompressor::~CloudCompressor(){
-
 }
 
 // Callback for ROS subscriber
@@ -54,13 +51,13 @@ void CloudCompressor::roscallback(const PointCloud::ConstPtr &cloud){
 	// Stream for storing serialized compressed point cloud
 	std::stringstream compressedData;
 
+	// Encode point cloud to stream
 	pointCloudEncoder_.encodePointCloud (croppedCloud_, compressedData);
 
+	// Publish the encoded stream
 	std_msgs::String msg;
 	msg.data = compressedData.str();
-
 	pub_.publish(msg);
-
 
 }
 
