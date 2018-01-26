@@ -10,15 +10,15 @@
 namespace wp3 {
 
 // Constructor
-CloudDecompressor::CloudDecompressor(std::string outputCloudTopic, std::string inputMsgTopic, std::string sensorName, const float intensityLimit, const bool showStatistics) :
+CloudDecompressor::CloudDecompressor(std::string outputCloudTopic, std::string inputMsgTopic, const float intensityLimit, const bool showStatistics) :
 				 decompressedCloud_(new PointCloudXYZI ()),
 				 outputCloud_(new PointCloudXYZI ()),
 				 ptfilter_(false),
 				 intensityLimit_(intensityLimit),
 				 pointCloudDecoder_(showStatistics)
 {
-	sub_ = nh_.subscribe<std_msgs::String>("/" + sensorName + inputMsgTopic, 1, &wp3::CloudDecompressor::roscallback, this);
-	pub_ = nh_.advertise<PointCloudXYZI>("/" + sensorName + outputCloudTopic, 1);
+	sub_ = nh_.subscribe<std_msgs::String>(inputMsgTopic, 1, &wp3::CloudDecompressor::roscallback, this);
+	pub_ = nh_.advertise<PointCloudXYZI>(outputCloudTopic, 1);
 }
 
 // Callback for ROS subscriber

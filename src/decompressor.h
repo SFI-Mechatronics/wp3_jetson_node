@@ -39,7 +39,7 @@ class CloudDecompressor
 {
 public:
 	// Constructor
-	CloudDecompressor(std::string outputCloudTopic, std::string inputMsgTopic, std::string sensorName, const float intensityLimit, const bool showStatistics);
+	CloudDecompressor(std::string outputCloudTopic, std::string inputMsgTopic, const float intensityLimit, const bool showStatistics);
 
 	// Empty Deconstructor
 	~CloudDecompressor(){}

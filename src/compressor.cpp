@@ -10,20 +10,19 @@
 namespace wp3 {
 
 // Constructor
-CloudCompressor::CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string sensorName, double resolution, bool showStatistics) :
+CloudCompressor::CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string sensorName, double octreeResolution, Eigen::Vector4f minPT, Eigen::Vector4f maxPT, bool showStatistics) :
 						 transformedCloud_(new PointCloud()),
 						 croppedCloud_(new PointCloud ()),
-						 octreeResolution_(resolution),
-						 pointCloudEncoder_(showStatistics, resolution, _MINX, _MINY, _MINZ, _MAXX, _MAXY, _MAXZ, _IFRAMERATE)
+						 octreeResolution_(octreeResolution),
+						 pointCloudEncoder_(showStatistics, octreeResolution, minPT[0], minPT[1], minPT[2], maxPT[0], maxPT[1], maxPT[2], _IFRAMERATE)
 {
 	rosTFLocalFrame_ = sensorName + _KINECTFRAME;
 	rosTFGlobalFrame_ = _GLOBALFRAME;
 
 	// Setup box crop filter
-	minPT_ << _MINX, _MINY, _MINZ, 1;
-	maxPT_ << _MAXX, _MAXY, _MAXZ, 1;
-	crop_.setMin(minPT_);
-	crop_.setMax(maxPT_);
+
+	crop_.setMin(minPT);
+	crop_.setMax(maxPT);
 
 	sub_ = nh_.subscribe<PointCloud>("/" + sensorName + inputCloudTopic, 1, &wp3::CloudCompressor::roscallback, this);
 	pub_ = nh_.advertise<std_msgs::String>("/" + sensorName + outputMsgTopic, 1);

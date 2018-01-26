@@ -16,7 +16,6 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/Image.h>
 #include <std_msgs/String.h>
 #include <tf/transform_listener.h>
 
@@ -26,7 +25,6 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/crop_box.h>
-#include <pcl/filters/passthrough.h>
 
 #include "octree_compression.h"
 
@@ -35,9 +33,6 @@
 // Typedefs
 typedef pcl::PointXYZ PointType;
 typedef pcl::PointCloud<PointType> PointCloud;
-
-typedef pcl::PointXYZI PointType_out;
-typedef pcl::PointCloud<PointType_out> PointCloudXYZI;
 
 typedef wp3::PointCloudCompression Compressor;
 
@@ -48,7 +43,7 @@ class CloudCompressor
 {
 public:
 	// Constructor
-	CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string sensorName, double resolution, bool showStatistics);
+	CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string sensorName, double octreeResolution, Eigen::Vector4f minPT_, Eigen::Vector4f maxPT_, bool showStatistics);
 
 	// Empty deconstrucor
 	~CloudCompressor(){}
@@ -78,7 +73,6 @@ private:
 	Compressor pointCloudEncoder_;
 
 	// Box crop filter
-	Eigen::Vector4f minPT_, maxPT_;
 	pcl::CropBox<PointType> crop_;
 };
 
