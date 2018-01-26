@@ -31,10 +31,6 @@ typedef pcl::PointCloud<PointType_out> PointCloudXYZI;
 typedef wp3::PointCloudCompression Compressor;
 //typedef wp3::PointCloudDecompression Decompressor;
 
-// ROS Subscriber
-
-//ros::Publisher pubSerialized;
-
 
 void killHandler(int)
 {
@@ -75,7 +71,7 @@ int main(int argc, char **argv)
 
 		ros::Duration(1.0).sleep();
 
-		wp3::CloudCompressor compressor(sensorName, _KINECTPOINTS, _TOPICOUT, resolution);
+		wp3::CloudCompressor compressor(_TOPICOUT, _KINECTPOINTS, sensorName, resolution, _STATISTICS);
 
 //		wp3::CloudDecompressor decompressor(sensorName, _TOPICOUT, false);
 

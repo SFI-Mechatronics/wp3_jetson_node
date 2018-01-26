@@ -9,15 +9,15 @@
 
 namespace wp3 {
 
-CloudDecompressor::CloudDecompressor(std::string sensorName, std::string inputMsgTopic, const bool showStatistics) :
-				 decompressedCloud(new PointCloudXYZI ()),
-				 outputCloud(new PointCloudXYZI ()),
-				 ptfilter(false),
-				 pointCloudDecoder(showStatistics)
+CloudDecompressor::CloudDecompressor(std::string outputCloudTopic, std::string inputMsgTopic, std::string sensorName, const float intensityLimit, const bool showStatistics) :
+				 decompressedCloud_(new PointCloudXYZI ()),
+				 outputCloud_(new PointCloudXYZI ()),
+				 ptfilter_(false),
+				 intensityLimit_(intensityLimit),
+				 pointCloudDecoder_(showStatistics)
 {
-
 	sub_ = nh_.subscribe<std_msgs::String>("/" + sensorName + inputMsgTopic, 1, &wp3::CloudDecompressor::roscallback, this);
-	pub_ = nh_.advertise<PointCloudXYZI>("/" + sensorName + _TOPICOUT, 1);
+	pub_ = nh_.advertise<PointCloudXYZI>("/" + sensorName + outputCloudTopic, 1);
 }
 
 CloudDecompressor::~CloudDecompressor(){
@@ -33,16 +33,16 @@ void CloudDecompressor::roscallback(const std_msgs::String::ConstPtr& msg){
 	compressedData << msg->data;
 
 //	std::cout << compressedData.str() << std::endl;
-	pointCloudDecoder.decodePointCloud (compressedData, decompressedCloud);
+	pointCloudDecoder_.decodePointCloud (compressedData, decompressedCloud_);
 
-	ptfilter.setInputCloud (decompressedCloud);
-	ptfilter.setFilterFieldName ("intensity");
-	ptfilter.setFilterLimits (_MINI, FLT_MAX);
-	ptfilter.filter (*outputCloud);
+	ptfilter_.setInputCloud (decompressedCloud_);
+	ptfilter_.setFilterFieldName ("intensity");
+	ptfilter_.setFilterLimits (intensityLimit_, FLT_MAX);
+	ptfilter_.filter (*outputCloud_);
 
 	// Publish the compressed cloud
-//	outputCloud->header.frame_id = rosTransformGlobalFrame;
-	pub_.publish(outputCloud);
+	outputCloud_->header.frame_id = _GLOBALFRAME;
+	pub_.publish(outputCloud_);
 
 }
 

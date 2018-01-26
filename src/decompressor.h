@@ -16,11 +16,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/Image.h>
 #include <std_msgs/String.h>
-#include <tf/transform_listener.h>
-
-#include <Eigen/Eigen>
 
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
@@ -28,11 +24,9 @@
 
 #include "octree_decompression.h"
 
-#include "defines.h"
+// Defines
+#define _GLOBALFRAME "world"
 
-// Typedefs
-typedef pcl::PointXYZ PointType;
-typedef pcl::PointCloud<PointType> PointCloud;
 
 typedef pcl::PointXYZI PointType_out;
 typedef pcl::PointCloud<PointType_out> PointCloudXYZI;
@@ -45,7 +39,7 @@ class CloudDecompressor
 {
 public:
 	// Constructor
-	CloudDecompressor(std::string sensorName, std::string inputMsgTopic, const bool showStatistics);
+	CloudDecompressor(std::string outputCloudTopic, std::string inputMsgTopic, std::string sensorName, const float intensityLimit, const bool showStatistics);
 	~CloudDecompressor();
 
 	// Callback for PointCloudXYZ subscriber
@@ -60,12 +54,13 @@ private:
 	ros::Publisher pub_;
 
 	// Pointers to temporary point clouds
-	PointCloudXYZI::Ptr decompressedCloud;
-	PointCloudXYZI::Ptr outputCloud;
+	PointCloudXYZI::Ptr decompressedCloud_;
+	PointCloudXYZI::Ptr outputCloud_;
 
-	Decompressor pointCloudDecoder;
+	Decompressor pointCloudDecoder_;
 
-	pcl::PassThrough<PointType_out> ptfilter; // Initializing with true will allow us to extract the removed indices
+	float intensityLimit_;
+	pcl::PassThrough<PointType_out> ptfilter_; // Initializing with true will allow us to extract the removed indices
 };
 
 }
