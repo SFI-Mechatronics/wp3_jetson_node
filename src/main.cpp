@@ -50,7 +50,13 @@ int main(int argc, char **argv)
 		Eigen::Vector4f minPT, maxPT;
 		minPT << _MINX, _MINY, _MINZ, 1;
 		maxPT << _MAXX, _MAXY, _MAXZ, 1;
-		wp3::CloudCompressor compressor(_TOPICOUT, _KINECTPOINTS, sensorName, resolution, minPT, maxPT, _STATISTICS);
+
+		std::string outputTopic = "/" + sensorName + _TOPICOUT;
+		std::string inputTopic = "/" + sensorName + _KINECTPOINTS;
+		std::string localFrame = sensorName + _KINECTFRAME;
+		std::string globalFrame = _GLOBALFRAME;
+
+		wp3::CloudCompressor compressor(outputTopic, inputTopic, localFrame, globalFrame, resolution, _IFRAMERATE, minPT, maxPT, _STATISTICS);
 
 		//		wp3::CloudDecompressor decompressor(sensorName, _TOPICOUT, false);
 

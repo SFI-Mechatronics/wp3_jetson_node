@@ -28,8 +28,6 @@
 
 #include "octree_compression.h"
 
-#include "defines.h"
-
 // Typedefs
 typedef pcl::PointXYZ PointType;
 typedef pcl::PointCloud<PointType> PointCloud;
@@ -43,7 +41,8 @@ class CloudCompressor
 {
 public:
 	// Constructor
-	CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string sensorName, double octreeResolution, Eigen::Vector4f minPT_, Eigen::Vector4f maxPT_, bool showStatistics);
+	CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string rosTFLocalFrame, std::string rosTFGlobalFrame,
+			double octreeResolution, unsigned int iFrameRate, Eigen::Vector4f minPT, Eigen::Vector4f maxPT, bool showStatistics);
 
 	// Empty deconstrucor
 	~CloudCompressor(){}
