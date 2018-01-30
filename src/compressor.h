@@ -66,6 +66,7 @@ private:
 	PointCloud::Ptr transformedCloud_;
 	PointCloud::Ptr croppedCloud_;
 
+	bool showStatistics_;
 	// Compression setup
 	double octreeResolution_;
 

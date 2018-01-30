@@ -161,6 +161,7 @@ private:
 	uint32_t frame_ID_;
 	uint64_t point_count_;
 	uint64_t compressed_point_data_len_;
+	uint64_t compressed_intensity_data_len_;
 	bool i_frame_;
 	const double octree_resolution_;
 

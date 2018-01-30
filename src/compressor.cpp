@@ -12,12 +12,13 @@ namespace wp3 {
 // Constructor
 CloudCompressor::CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string rosTFLocalFrame, std::string rosTFGlobalFrame,
 		double octreeResolution, unsigned int iFrameRate, Eigen::Vector4f minPT, Eigen::Vector4f maxPT, bool showStatistics) :
-						 transformedCloud_(new PointCloud()),
-						 croppedCloud_(new PointCloud ()),
-						 octreeResolution_(octreeResolution),
-						 rosTFLocalFrame_(rosTFLocalFrame),
-						 rosTFGlobalFrame_(rosTFGlobalFrame),
-						 pointCloudEncoder_(showStatistics, octreeResolution, minPT[0], minPT[1], minPT[2], maxPT[0], maxPT[1], maxPT[2], iFrameRate)
+								 transformedCloud_(new PointCloud()),
+								 croppedCloud_(new PointCloud ()),
+								 octreeResolution_(octreeResolution),
+								 rosTFLocalFrame_(rosTFLocalFrame),
+								 rosTFGlobalFrame_(rosTFGlobalFrame),
+								 showStatistics_(showStatistics),
+								 pointCloudEncoder_(showStatistics, octreeResolution, minPT[0], minPT[1], minPT[2], maxPT[0], maxPT[1], maxPT[2], iFrameRate)
 {
 	// Setup box crop filter
 
@@ -46,6 +47,19 @@ void CloudCompressor::roscallback(const PointCloud::ConstPtr &cloud){
 	// Crop the point cloud
 	crop_.setInputCloud(transformedCloud_);
 	crop_.filter(*croppedCloud_);
+
+	if (showStatistics_)
+			{
+				float input_size = static_cast<float> (cloud->size());
+				float cropped_size = static_cast<float> (croppedCloud_->size());
+
+				PCL_INFO ("*** POINTCLOUD FILTERING ***\n");
+
+				PCL_INFO ("Number of points in original cloud: %f\n", input_size);
+				PCL_INFO ("Number of points in cropped cloud: %f\n\n", cropped_size);
+
+			}
+
 
 	// Stream for storing serialized compressed point cloud
 	std::stringstream compressedData;

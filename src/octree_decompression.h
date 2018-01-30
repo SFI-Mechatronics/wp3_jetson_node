@@ -59,14 +59,14 @@ public:
 	 *
 	 */
 	PointCloudDecompression ( bool showStatistics_arg = false) :
-				OctreePointCloud<PointT, LeafT, BranchT, OctreeT> (0.05),
-				entropy_coder_ (),
-				frame_ID_ (0),
-				point_count_ (0),
-				i_frame_ (true),
-				b_show_statistics_ (showStatistics_arg),
-				pointIntensityVector_ (),
-				pointIntensityVectorIterator_ (){
+		OctreePointCloud<PointT, LeafT, BranchT, OctreeT> (0.05),
+		entropy_coder_ (),
+		frame_ID_ (0),
+		point_count_ (0),
+		i_frame_ (true),
+		b_show_statistics_ (showStatistics_arg),
+		pointIntensityVector_ (),
+		pointIntensityVectorIterator_ (){
 
 		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
 		//this->setResolution (octree_resolution_);
