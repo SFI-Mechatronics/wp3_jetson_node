@@ -60,8 +60,15 @@ int main(int argc, char **argv)
 
 		//		wp3::CloudDecompressor decompressor(sensorName, _TOPICOUT, false);
 
+		std::cout << 3.0f * sizeof (float) << std::endl;
 		while(ros::ok()){
+			time_t start = clock();
+
 			ros::spinOnce();
+			clock_t end = clock();
+			double time = (double) (end-start) / CLOCKS_PER_SEC * 1000.0;
+			if(_STATISTICS)
+				std::cout << time << std::endl;
 			loopRate.sleep();
 		}
 

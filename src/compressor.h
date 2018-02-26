@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sstream>
+#include <fstream>
 #include <cstdlib>
 #include <signal.h>
 
@@ -44,8 +45,8 @@ public:
 	CloudCompressor(std::string outputMsgTopic, std::string inputCloudTopic, std::string rosTFLocalFrame, std::string rosTFGlobalFrame,
 			double octreeResolution, unsigned int iFrameRate, Eigen::Vector4f minPT, Eigen::Vector4f maxPT, bool showStatistics);
 
-	// Empty deconstrucor
-	~CloudCompressor(){}
+	// Deconstrucor
+	~CloudCompressor();
 
 	// Callback for PointCloudXYZ subscriber
 	void roscallback(const PointCloud::ConstPtr &cloud);
@@ -66,7 +67,6 @@ private:
 	PointCloud::Ptr transformedCloud_;
 	PointCloud::Ptr croppedCloud_;
 
-	bool showStatistics_;
 	// Compression setup
 	double octreeResolution_;
 
@@ -74,6 +74,11 @@ private:
 
 	// Box crop filter
 	pcl::CropBox<PointType> crop_;
+
+	// Logging
+	bool showStatistics_;
+	std::string logFile_;
+	std::ofstream logStream_;
 };
 
 }

@@ -41,8 +41,8 @@ public:
 	// Constructor
 	CloudDecompressor(std::string outputCloudTopic, std::string inputMsgTopic, const float intensityLimit, const bool showStatistics);
 
-	// Empty Deconstructor
-	~CloudDecompressor(){}
+	// Deconstrucor
+	~CloudDecompressor();
 
 	// Callback for PointCloudXYZ subscriber
 	void roscallback(const std_msgs::String::ConstPtr& msg);
@@ -63,6 +63,12 @@ private:
 	// Passthrough filter
 	float intensityLimit_;
 	pcl::PassThrough<PointType_out> ptfilter_; // Initializing with true will allow us to extract the removed indices
+
+	// Logging
+	bool showStatistics_;
+	std::string logFile_;
+	std::ofstream logStream_;
+
 };
 
 }

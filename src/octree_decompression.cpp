@@ -50,18 +50,18 @@ void PointCloudDecompression::decodePointCloud (std::istream& compressed_tree_da
 
 		PCL_INFO ("*** POINTCLOUD DECODING ***\n");
 		PCL_INFO ("Frame ID: %d\n", frame_ID_);
-		if (i_frame_)
-			PCL_INFO ("Decoding Frame: Intra frame\n");
-		else
-			PCL_INFO ("Decoding Frame: Prediction frame\n");
-		PCL_INFO ("Number of decoded points: %ld\n", point_count_);
-		PCL_INFO ("XYZ compression percentage: %f%%\n", bytes_per_XYZ / (3.0f * sizeof (float)) * 100.0f);
-		PCL_INFO ("XYZ bytes per point: %f bytes\n", bytes_per_XYZ);
-		PCL_INFO ("Size of uncompressed point cloud: %f kBytes\n", static_cast<float> (point_count_) * (sizeof (int) + 3.0f * sizeof (float)) / 1024.0f);
-		PCL_INFO ("Size of compressed point cloud: %f kBytes\n", static_cast<float> (compressed_point_data_len_) / 1024.0f);
-		PCL_INFO ("Total bytes per point: %f bytes\n", bytes_per_XYZ);
-		PCL_INFO ("Total compression percentage: %f%%\n", (bytes_per_XYZ) / (sizeof (int) + 3.0f * sizeof (float)) * 100.0f);
-		PCL_INFO ("Compression ratio: %f\n\n", static_cast<float> (sizeof (int) + 3.0f * sizeof (float)) / static_cast<float> (bytes_per_XYZ));
+//		if (i_frame_)
+//			PCL_INFO ("Decoding Frame: Intra frame\n");
+//		else
+//			PCL_INFO ("Decoding Frame: Prediction frame\n");
+//		PCL_INFO ("Number of decoded points: %ld\n", point_count_);
+//		PCL_INFO ("XYZ compression percentage: %f%%\n", bytes_per_XYZ / (3.0f * sizeof (float)) * 100.0f);
+//		PCL_INFO ("XYZ bytes per point: %f bytes\n", bytes_per_XYZ);
+//		PCL_INFO ("Size of uncompressed point cloud: %f kBytes\n", static_cast<float> (point_count_) * (sizeof (int) + 3.0f * sizeof (float)) / 1024.0f);
+//		PCL_INFO ("Size of compressed point cloud: %f kBytes\n", static_cast<float> (compressed_point_data_len_) / 1024.0f);
+//		PCL_INFO ("Total bytes per point: %f bytes\n", bytes_per_XYZ);
+//		PCL_INFO ("Total compression percentage: %f%%\n", (bytes_per_XYZ) / (sizeof (int) + 3.0f * sizeof (float)) * 100.0f);
+//		PCL_INFO ("Compression ratio: %f\n\n", static_cast<float> (sizeof (int) + 3.0f * sizeof (float)) / static_cast<float> (bytes_per_XYZ));
 	}
 } // End decodePointCloud
 

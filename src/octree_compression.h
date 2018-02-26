@@ -10,6 +10,7 @@
 
 #include <iterator>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <stdio.h>
 #include <string.h>
@@ -76,8 +77,13 @@ public:
 				pointIntensityVector_ (),
 				recent_tree_depth_(0),
 				minX_(minX_arg), minY_(minY_arg), minZ_(minZ_arg),
-				maxX_(maxX_arg), maxY_(maxY_arg), maxZ_(maxZ_arg){
+				maxX_(maxX_arg), maxY_(maxY_arg), maxZ_(maxZ_arg),
+				logFile("/home/nvidia/encoderlog.txt"){
 
+		if(b_show_statistics_){
+			logStream.open(logFile.c_str());
+			logStream << "NumPoints\tXYZpc\tXYZbpp\tINTbpp\tOsize\tCsize\tBPP\tCPC\tRATIO" << std::endl;
+		}
 
 		frame_header_identifier_ = "<WP3-OCT-COMPRESSED>";
 
@@ -87,9 +93,10 @@ public:
 	} // End Constructor
 
 
-	/** \brief Empty deconstructor. */
+	/** \brief Deconstructor. */
 	virtual ~PointCloudCompression (){
-
+		if(b_show_statistics_)
+			logStream.close();
 	}
 
 
@@ -179,6 +186,10 @@ private:
 
 	//header
 	const char* frame_header_identifier_;
+
+	// Logging
+	std::string logFile;
+	std::ofstream logStream;
 
 };
 
